@@ -1,0 +1,26 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Moon glow -->
+  <circle cx="60" cy="60" r="58" fill="url(#moonGlow)" opacity="0.3"/>
+  
+  <!-- Main moon -->
+  <circle cx="60" cy="60" r="45" fill="url(#moonGradient)"/>
+  
+  <!-- Craters -->
+  <ellipse cx="45" cy="50" rx="8" ry="6" fill="#D4D4D8" opacity="0.3"/>
+  <ellipse cx="70" cy="65" rx="6" ry="5" fill="#D4D4D8" opacity="0.25"/>
+  <ellipse cx="55" cy="75" rx="5" ry="4" fill="#D4D4D8" opacity="0.2"/>
+  <ellipse cx="75" cy="45" rx="4" ry="3" fill="#D4D4D8" opacity="0.3"/>
+  <ellipse cx="40" cy="70" rx="3" ry="2.5" fill="#D4D4D8" opacity="0.25"/>
+  
+  <defs>
+    <radialGradient id="moonGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#FEF9C3" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#FEF9C3" stop-opacity="0"/>
+    </radialGradient>
+    
+    <radialGradient id="moonGradient" cx="0.3" cy="0.3" r="0.8">
+      <stop offset="0%" stop-color="#FEFCE8"/>
+      <stop offset="100%" stop-color="#FEF9C3"/>
+    </radialGradient>
+  </defs>
+</svg>
