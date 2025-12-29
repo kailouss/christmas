@@ -4,6 +4,7 @@ import Snowfall from "react-snowfall";
 import Image from "next/image";
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { Play, Pause } from "lucide-react";
 
 export default function Home() {
@@ -108,6 +109,14 @@ export default function Home() {
   return (
     <main className="bg-blue-950 text-white">
       <section className="relative h-screen md:min-h-[130vh] overflow-hidden bg-linear-to-b from-blue-950 via-blue-900 to-blue-800">
+        {/* Slanted overlay stamp */}
+        <div className="pointer-events-none absolute inset-0 z-90 flex items-start justify-end p-10">
+          <div className="rotate-6 rounded-lg border-4 border-white/50 bg-white/15 px-6 py-3 text-right text-sm font-semibold uppercase tracking-wide text-white shadow-[0_10px_30px_rgba(0,0,0,0.25)] backdrop-blur-md">
+            Christmas is over
+            <br />
+            Scroll down for New Year
+          </div>
+        </div>
         {/* Audio element */}
         <audio ref={audioRef} src="/WinterWonderland.mp3" preload="auto" />
 
@@ -157,9 +166,9 @@ export default function Home() {
           />
         </motion.div>
 
-        {/* Neighborhood skyline - foreground before snow layers */}
+        {/* Neighborhood skyline - foreground before snow layers (blurred) */}
         <motion.div
-          className="absolute left-1/2 z-10 -translate-x-1/2 pointer-events-none"
+          className="absolute left-1/2 z-10 -translate-x-1/2 pointer-events-none blur-[15%]"
           style={{ y: neighborhoodYSmooth, bottom: OFFSETS.neighborhoodBottom }}
           initial={{ opacity: 0, scale: 1.02 }}
           animate={{ opacity: 1, scale: 1.08 }}
@@ -193,8 +202,8 @@ export default function Home() {
           </svg>
         </motion.div>
 
-        {/* Main snow layer */}
-        <div className="absolute bottom-0 left-0 right-0 z-30 h-40 sm:h-48 md:h-56 bg-white">
+        {/* Main snow layer (blurred) */}
+        <div className="absolute bottom-0 left-0 right-0 z-30 h-40 sm:h-48 md:h-56 bg-white blur-[15%]">
           <svg
             className="absolute top-0 left-0 w-full h-full"
             style={{ transform: `translateY(${OFFSETS.mainSnowTranslateY}%)` }}
@@ -208,9 +217,9 @@ export default function Home() {
           </svg>
         </div>
 
-        {/* Main Christmas tree */}
+        {/* Main Christmas tree (blurred) */}
         <div
-          className="absolute left-1/2 z-40 flex -translate-x-1/2 px-4"
+          className="absolute left-1/2 z-40 flex -translate-x-1/2 px-4 blur-[15%]"
           style={{ bottom: OFFSETS.treePaddingBottom }}
         >
           <motion.div
@@ -243,7 +252,7 @@ export default function Home() {
       </section>
 
       <section className="relative z-50 bg-white text-slate-900">
-        <div className="mx-auto flex max-w-5xl flex-col gap-12 px-6 py-20">
+        <div className="mx-auto flex max-w-5xl flex-col gap-12 px-6 py-20 blur-[15%]">
           {/* Merry Christmas Section */}
           <motion.div
             className="flex flex-col items-center justify-center gap-4"
@@ -263,32 +272,20 @@ export default function Home() {
             </p>
           </motion.div>
 
-          {/* Countdown Section */}
-          <div className="flex flex-col items-center gap-8 rounded-3xl bg-linear-to-b from-blue-50 to-slate-50 p-10">
+          {/* CTA to New Year preview */}
+          <div className="flex flex-col items-center gap-6 rounded-3xl bg-linear-to-b from-blue-50 to-slate-50 p-10 shadow-md">
             <h2 className="text-3xl md:text-4xl font-semibold text-slate-900">
-              2025 Wrapped
+              New Year Wrapped
             </h2>
-            <p className="text-slate-700 text-center">Coming soon...</p>
-            <div className="grid grid-cols-4 gap-4 md:gap-6 w-full max-w-md">
-              {[
-                { label: "Days", value: timeLeft.days },
-                { label: "Hours", value: timeLeft.hours },
-                { label: "Minutes", value: timeLeft.minutes },
-                { label: "Seconds", value: timeLeft.seconds },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="flex flex-col items-center gap-2 rounded-xl bg-white p-4 shadow-md"
-                >
-                  <div className="text-2xl md:text-3xl font-bold text-blue-600">
-                    {String(item.value).padStart(2, "0")}
-                  </div>
-                  <div className="text-xs md:text-sm font-medium text-slate-600">
-                    {item.label}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <p className="text-slate-700 text-center max-w-xl">
+              Christmas is done — tap below to start your New Year preview.
+            </p>
+            <Link
+              href="/preview"
+              className="rounded-full bg-blue-600 px-6 py-3 text-lg font-semibold text-white shadow-lg transition hover:bg-blue-700"
+            >
+              Go to Preview
+            </Link>
           </div>
         </div>
       </section>
