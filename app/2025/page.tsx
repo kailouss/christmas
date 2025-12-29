@@ -11,7 +11,6 @@ import { ProgressBar } from "./_components/ProgressBar";
 import { Controls } from "./_components/Controls";
 import { NavigationButton } from "./_components/NavigationButton";
 import { Raleway } from "next/font/google";
-import { Poppins } from "next/font/google";
 
 const ralewayThin = Raleway({
   weight: "100",
@@ -38,6 +37,17 @@ export default function WrappedGate() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const { isUnlocked } = useCountdown(TARGET_DATE);
   const slideContainerRef = useRef<HTMLDivElement>(null!);
+  // Intro timed text states
+  const [showIntroTitle, setShowIntroTitle] = useState(false);
+  const [showIntroSubtitle, setShowIntroSubtitle] = useState(false);
+  const [showIntroContent, setShowIntroContent] = useState(false);
+  const [introReplacementTitle, setIntroReplacementTitle] = useState<
+    string | null
+  >(null);
+  const [introReplacementBold, setIntroReplacementBold] = useState(false);
+  // Countdown stages: 'year' | 'months' | 'days' | 'memories' | 'fade'
+  const [countdownStage, setCountdownStage] = useState<string | null>(null);
+  const [monthsZoomed, setMonthsZoomed] = useState(false);
 
   // Flash sequence: BigFlash -> SmallFlash (4x) -> BigFlash -> SmallFlash (4x)
   // 1st: BigFlash at 2sec
@@ -102,6 +112,60 @@ export default function WrappedGate() {
     return () => clearTimeout(timer);
   }, [currentSlide]);
 
+  // Schedule intro text sequence
+  useEffect(() => {
+    // Reset states on slide change
+    setShowIntroTitle(false);
+    setShowIntroSubtitle(false);
+    setShowIntroContent(false);
+    setIntroReplacementTitle(null);
+    setIntroReplacementBold(false);
+    setCountdownStage(null);
+    setMonthsZoomed(false);
+
+    if (currentSlide !== 0) return;
+
+    const timers: number[] = [];
+
+    // Title at 2000ms
+    timers.push(window.setTimeout(() => setShowIntroTitle(true), 2000));
+    // Subtitle at 2500ms
+    timers.push(window.setTimeout(() => setShowIntroSubtitle(true), 2500));
+    // Content at 4500ms
+    timers.push(window.setTimeout(() => setShowIntroContent(true), 4500));
+    // Replace all with "2025" (thin) at 6500ms
+    timers.push(
+      window.setTimeout(() => {
+        setShowIntroTitle(false);
+        setShowIntroSubtitle(false);
+        setShowIntroContent(false);
+        setIntroReplacementTitle("2025");
+        setIntroReplacementBold(false);
+        setCountdownStage("year");
+      }, 6500)
+    );
+    // Make replacement title bigger and bold at 8500ms
+    timers.push(
+      window.setTimeout(() => {
+        setIntroReplacementBold(true);
+      }, 8500)
+    );
+    // Replace with "12 | Months" at 10400ms
+    timers.push(window.setTimeout(() => setCountdownStage("months"), 10400));
+    // Zoom in "12 | Months" at 11000ms
+    timers.push(window.setTimeout(() => setMonthsZoomed(true), 11000));
+    // Replace with "365\nDays" at 13000ms
+    timers.push(window.setTimeout(() => setCountdownStage("days"), 13000));
+    // Replace with "Infinite\nMemories" at 15000ms
+    timers.push(window.setTimeout(() => setCountdownStage("memories"), 15000));
+    // Fade all at 17000ms
+    timers.push(window.setTimeout(() => setCountdownStage("fade"), 17000));
+
+    return () => {
+      timers.forEach((t) => window.clearTimeout(t));
+    };
+  }, [currentSlide]);
+
   const slide = SLIDES[currentSlide];
   const progress = ((currentSlide + 1) / SLIDES.length) * 100;
 
@@ -139,20 +203,100 @@ export default function WrappedGate() {
               )}
               {"isFinal" in s && <LastPage slide={s} isUnlocked={isUnlocked} />}
               {"isIntro" in s && (
-                <div className="flex flex-col items-center gap-6 text-center">
-                  <div
-                    className={`${ralewayBold.className} text-5xl sm:text-6xl md:text-7xl`}
-                  >
-                    {s.content}
-                  </div>
-                  <h1
-                    className={`${ralewayThin.className} text-6xl font-bold sm:text-7xl md:text-8xl`}
-                  >
-                    {s.title}
-                  </h1>
-                  <p className="text-gray-400 font-thin text-lg sm:text-xl md:text-2xl opacity-90">
-                    {s.subtitle}
-                  </p>
+                <div className="flex flex-col items-center gap-4 text-center">
+                  {introReplacementTitle ? (
+                    <div
+                      className={`flex flex-col items-center gap-6 transition-opacity duration-1000 ${
+                        countdownStage === "fade" ? "opacity-0" : "opacity-100"
+                      }`}
+                    >
+                      {countdownStage === "year" && (
+                        <h1
+                          className={`${
+                            introReplacementBold
+                              ? ralewayBold.className
+                              : ralewayThin.className
+                          } ${
+                            introReplacementBold
+                              ? "text-8xl sm:text-9xl"
+                              : "text-6xl sm:text-7xl"
+                          }`}
+                        >
+                          {introReplacementTitle}
+                        </h1>
+                      )}
+                      {countdownStage === "months" && (
+                        <div
+                          className={`${
+                            ralewayThin.className
+                          } flex items-center gap-4 ${
+                            monthsZoomed
+                              ? "text-6xl sm:text-7xl md:text-8xl"
+                              : "text-4xl sm:text-5xl md:text-6xl"
+                          }`}
+                        >
+                          <span className={ralewayBold.className}>12</span>
+                          <span className="text-gray-300">|</span>
+                          <span>Months</span>
+                        </div>
+                      )}
+                      {countdownStage === "days" && (
+                        <div
+                          className={`${ralewayThin.className} flex flex-col items-center animate-pulse`}
+                        >
+                          <span
+                            className={`${ralewayBold.className} text-6xl sm:text-7xl md:text-8xl`}
+                            style={{
+                              textShadow: "0 0 20px rgba(255,255,255,0.5)",
+                            }}
+                          >
+                            365
+                          </span>
+                          <span className="text-3xl sm:text-4xl md:text-5xl text-gray-300">
+                            Days
+                          </span>
+                        </div>
+                      )}
+                      {countdownStage === "memories" && (
+                        <div
+                          className={`${ralewayThin.className} flex flex-col items-center text-5xl sm:text-6xl md:text-7xl`}
+                        >
+                          <span>Infinite</span>
+                          <span className="text-gray-300">Memories</span>
+                        </div>
+                      )}
+                      {countdownStage === "fade" && (
+                        <div
+                          className={`${ralewayThin.className} flex flex-col items-center text-5xl sm:text-6xl md:text-7xl`}
+                        >
+                          <span>Infinite</span>
+                          <span className="text-gray-300">Memories</span>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <>
+                      {showIntroContent && (
+                        <div
+                          className={`${ralewayThin.className} text-5xl sm:text-6xl md:text-7xl`}
+                        >
+                          {s.content}
+                        </div>
+                      )}
+                      {showIntroTitle && (
+                        <h1
+                          className={`${ralewayBold.className} text-6xl font-bold sm:text-7xl md:text-8xl`}
+                        >
+                          {s.title}
+                        </h1>
+                      )}
+                      {showIntroSubtitle && (
+                        <p className="text-gray-400 font-thin text-lg sm:text-xl md:text-2xl opacity-90">
+                          {s.subtitle}
+                        </p>
+                      )}
+                    </>
+                  )}
                 </div>
               )}
             </div>

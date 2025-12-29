@@ -61,7 +61,7 @@ export const SLIDES = [
   {
     id: 13,
     title: "See you in 2026!",
-    subtitle: "Reflecting & celebrating",
+    subtitle: "iloveyouuu!!!<3",
     content: "That’s a wrap for 2025!",
     isFinal: true,
   },

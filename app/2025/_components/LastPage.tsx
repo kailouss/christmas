@@ -1,4 +1,17 @@
 import type { Slide } from "./Contents";
+import { Raleway } from "next/font/google";
+
+const ralewayThin = Raleway({
+  weight: "100",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const ralewayBold = Raleway({
+  weight: "600",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 interface LastPageProps {
   slide: Slide;
@@ -12,11 +25,19 @@ export function LastPage({ slide, isUnlocked }: LastPageProps) {
     <>
       {/* Content */}
       <div className="flex flex-col items-center gap-6 text-center">
-        <div className="text-6xl sm:text-7xl md:text-8xl">{slide.content}</div>
-        <h1 className="text-4xl font-bold sm:text-5xl md:text-6xl">
+        <div
+          className={`${ralewayThin.className} text-5xl font-thin sm:text-6xl md:text-7xl`}
+        >
+          {slide.content}
+        </div>
+        <h1
+          className={`${ralewayBold.className} text-6xl font-bold sm:text-7xl md:text-8xl`}
+        >
           {slide.title}
         </h1>
-        <p className="text-lg sm:text-xl md:text-2xl font-light opacity-90">
+        <p
+          className={`${ralewayThin.className} text-lg sm:text-xl md:text-2xl font-light opacity-90`}
+        >
           {slide.subtitle}
         </p>
       </div>
