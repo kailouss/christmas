@@ -24,8 +24,8 @@ const dancing = Dancing_Script({
 });
 
 export const metadata: Metadata = {
-  title: "Merry Christmas",
-  description: "Open your Christmas surprise!",
+  title: "Happy New Year!",
+  description: "Open your surprise!",
 };
 
 export default function RootLayout({
