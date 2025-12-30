@@ -109,21 +109,35 @@ export default function Home() {
   return (
     <main className="bg-blue-950 text-white">
       <section className="relative h-screen md:min-h-[130vh] overflow-hidden bg-linear-to-b from-blue-950 via-blue-900 to-blue-800">
-        {/* Slanted overlay stamp */}
-        <div className="pointer-events-none absolute inset-0 z-90 flex items-start justify-end p-10">
-          <div className="rotate-6 rounded-lg border-4 border-white/50 bg-white/15 px-6 py-3 text-right text-sm font-semibold uppercase tracking-wide text-white shadow-[0_10px_30px_rgba(0,0,0,0.25)] backdrop-blur-md">
-            Christmas is over
-            <br />
-            Scroll down for New Year
+        {/* New Year Wrapped Modal Overlay */}
+        <div className="fixed inset-0 z-99 flex items-center justify-center backdrop-blur-md bg-black/30">
+          <div className="relative mx-6 flex max-w-2xl flex-col items-center gap-6 rounded-3xl bg-white p-10 shadow-2xl">
+            {/* Slanted stamp - top right corner of modal */}
+            <div className="absolute -top-4 -right-4 rotate-6 rounded-lg border-4 border-blue-600/50 bg-blue-600/15 px-6 py-3 text-right text-sm font-semibold uppercase tracking-wide text-blue-900 shadow-[0_10px_30px_rgba(0,0,0,0.25)] backdrop-blur-md">
+              Christmas is over
+              <br />
+              Tap for New Year
+            </div>
+
+            <h2 className="mt-4 text-center text-3xl md:text-4xl font-semibold text-slate-900">
+              New Year Wrapped
+            </h2>
+            <Link
+              href="/preview"
+              className="rounded-full bg-blue-600 px-6 py-3 text-lg font-semibold text-white shadow-lg transition hover:bg-blue-700"
+            >
+              Go to Preview
+            </Link>
           </div>
         </div>
+
         {/* Audio element */}
         <audio ref={audioRef} src="/WinterWonderland.mp3" preload="auto" />
 
         {/* Music player button - fixed top left */}
         <button
           onClick={toggleAudio}
-          className="fixed top-6 left-6 z-100 w-16 h-16 rounded-full bg-blue-600 hover:bg-blue-700 shadow-lg transition-colors flex items-center justify-center"
+          className="fixed top-6 left-6 z-50 w-16 h-16 rounded-full bg-blue-600 hover:bg-blue-700 shadow-lg transition-colors flex items-center justify-center"
           title={isPlaying ? "Pause music" : "Play music"}
         >
           {isPlaying ? (
@@ -271,22 +285,6 @@ export default function Home() {
               I love youuu!! mwamwah!!!
             </p>
           </motion.div>
-
-          {/* CTA to New Year preview */}
-          <div className="flex flex-col items-center gap-6 rounded-3xl bg-linear-to-b from-blue-50 to-slate-50 p-10 shadow-md">
-            <h2 className="text-3xl md:text-4xl font-semibold text-slate-900">
-              New Year Wrapped
-            </h2>
-            <p className="text-slate-700 text-center max-w-xl">
-              Christmas is done — tap below to start your New Year preview.
-            </p>
-            <Link
-              href="/preview"
-              className="rounded-full bg-blue-600 px-6 py-3 text-lg font-semibold text-white shadow-lg transition hover:bg-blue-700"
-            >
-              Go to Preview
-            </Link>
-          </div>
         </div>
       </section>
     </main>

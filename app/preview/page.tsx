@@ -23,6 +23,21 @@ const MONTHS = [
   "January",
 ];
 
+const MONTH_IMAGES: Record<string, string> = {
+  January: "/MonthPhotos/January/5.jpg",
+  February: "/MonthPhotos/February/4.jpg",
+  March: "/MonthPhotos/March/4.jpg",
+  April: "/MonthPhotos/April/1.jpg",
+  May: "/MonthPhotos/May/4.jpg",
+  June: "/MonthPhotos/June/3.jpg",
+  July: "/MonthPhotos/July/2.jpg",
+  August: "/MonthPhotos/August/3.jpg",
+  September: "/MonthPhotos/September/2.jpg",
+  October: "/MonthPhotos/October/3.jpg",
+  November: "/MonthPhotos/November/1.jpg",
+  December: "/MonthPhotos/December/6.jpg",
+};
+
 const FLASH_DURATION_MS = 8000;
 
 declare global {
@@ -164,9 +179,9 @@ export default function PreviewPage() {
                     {/* Month on left */}
                     <div className="flex-1">
                       <img
-                        src="/test.webp"
+                        src={MONTH_IMAGES[month]}
                         alt={month}
-                        className="w-full relative max-w-md rounded-lg shadow-xl z-20"
+                        className="w-full relative max-w-md rounded-lg shadow-xl z-20 object-cover aspect-video"
                       />
                     </div>
                     {/* Text on right */}
@@ -183,9 +198,9 @@ export default function PreviewPage() {
                     {/* Month on right */}
                     <div className="flex-1">
                       <img
-                        src="/test.webp"
+                        src={MONTH_IMAGES[month]}
                         alt={month}
-                        className="w-full relative max-w-md rounded-lg shadow-xl z-20"
+                        className="w-full relative max-w-md rounded-lg shadow-xl z-20 object-cover aspect-video"
                       />
                     </div>
                   </>

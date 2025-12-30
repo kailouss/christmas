@@ -5,11 +5,29 @@ import gsap from "gsap";
 
 interface GlobalPhotoShowcaseProps {
   enabled: boolean; // generate new photos only when true; existing ones fade naturally
+  month?: string; // month name to determine which folder to load images from
 }
 
-const IMAGE_SRC = "/test.webp";
 const GENERATE_INTERVAL_MS = 250; // 16 photos in ~4s
 const EXPOSURE_SECONDS = 1; // life of each photo
+
+// Preload images for given month to prevent lag
+function preloadMonthImages(month: string) {
+  if (typeof window === "undefined" || !month) return;
+
+  for (let i = 1; i <= 8; i++) {
+    const img = new Image();
+    img.src = `/MonthPhotos/${month}/${i}.jpg`;
+  }
+}
+
+function getImageSource(month?: string, index?: number): string {
+  if (!month || index === undefined) return "/test.webp";
+
+  // Cycle through photos 1-8 twice (16 total photos per month slide)
+  const photoNumber = (index % 8) + 1;
+  return `/MonthPhotos/${month}/${photoNumber}.jpg`;
+}
 
 function randomPosition() {
   const top = 5 + Math.random() * 70; // 5% - 75%
@@ -22,19 +40,30 @@ function randomPosition() {
   return { top, left, initialScale, targetScale, rotation, moveX, moveY };
 }
 
-export function GlobalPhotoShowcase({ enabled }: GlobalPhotoShowcaseProps) {
+export function GlobalPhotoShowcase({
+  enabled,
+  month,
+}: GlobalPhotoShowcaseProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<number | null>(null);
+  const photoCountRef = useRef(0);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
+    // Reset photo counter and preload when month changes
+    photoCountRef.current = 0;
+    if (month) {
+      preloadMonthImages(month);
+    }
+
     const createAndAnimate = () => {
       const { top, left, initialScale, targetScale, rotation, moveX, moveY } =
         randomPosition();
       const img = document.createElement("img");
-      img.src = IMAGE_SRC;
+      img.src = getImageSource(month, photoCountRef.current);
+      photoCountRef.current += 1;
       img.alt = "Wrapped memory";
       img.style.position = "absolute";
       img.style.top = `${top}%`;
@@ -93,7 +122,7 @@ export function GlobalPhotoShowcase({ enabled }: GlobalPhotoShowcaseProps) {
       stop();
       container.innerHTML = "";
     };
-  }, [enabled]);
+  }, [enabled, month]);
 
   return (
     <div

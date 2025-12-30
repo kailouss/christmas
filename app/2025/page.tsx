@@ -27,6 +27,7 @@ const ralewayBold = Raleway({
 declare global {
   interface Window {
     __wrappedAudio?: HTMLAudioElement;
+    __audioStartTime?: number; // Track when audio actually started playing
   }
 }
 
@@ -50,10 +51,23 @@ export default function WrappedGate() {
   const [monthsZoomed, setMonthsZoomed] = useState(false);
 
   // Flash sequence: BigFlash -> SmallFlash (4x) -> BigFlash -> SmallFlash (4x)
+  // Adjust timing based on music start time to account for page load delays
+
+  // Calculate delay offset from music start time
+  const getFlashDelay = (baseDelay: number) => {
+    const audioStartTime =
+      typeof window !== "undefined" ? window.__audioStartTime : 0;
+    const currentTime = Date.now();
+    const timeSinceAudioStart = audioStartTime
+      ? currentTime - audioStartTime
+      : 0;
+    return Math.max(0, baseDelay - timeSinceAudioStart);
+  };
+
   // 1st: BigFlash at 2sec
   useFlash(slideContainerRef, {
     enabled: true,
-    startDelay: 2000,
+    startDelay: getFlashDelay(2000),
     duration: 150,
     intensity: 0.5,
   });
@@ -61,7 +75,7 @@ export default function WrappedGate() {
   // 2nd: SmallFlash (4 times) starting at 2.5sec, repeating every 2sec
   useFlash(slideContainerRef, {
     enabled: true,
-    startDelay: 2500,
+    startDelay: getFlashDelay(2500),
     interval: 2000,
     count: 4,
     duration: 200,
@@ -71,7 +85,7 @@ export default function WrappedGate() {
   // 3rd: BigFlash at 10.5sec (2.5sec + 4*2sec for small flashes)
   useFlash(slideContainerRef, {
     enabled: true,
-    startDelay: 10400,
+    startDelay: getFlashDelay(10400),
     duration: 150,
     intensity: 0.5,
   });
@@ -79,7 +93,7 @@ export default function WrappedGate() {
   // 4th: SmallFlash (4 times) starting at 11sec, repeating every 2sec
   useFlash(slideContainerRef, {
     enabled: true,
-    startDelay: 11000,
+    startDelay: getFlashDelay(11000),
     interval: 2000,
     count: 4,
     duration: 200,
@@ -95,6 +109,8 @@ export default function WrappedGate() {
     window.__wrappedAudio = audio;
 
     if (audio.paused) {
+      // Record the exact time when audio starts playing
+      window.__audioStartTime = Date.now();
       audio.play().catch(() => {
         /* If play is blocked, user can tap any control to resume. */
       });
@@ -186,7 +202,14 @@ export default function WrappedGate() {
       {/* Carousel Container */}
       <div ref={slideContainerRef} className="relative h-full w-full">
         {/* Global photo showcase overlay; enabled only on month slides */}
-        <GlobalPhotoShowcase enabled={"month" in SLIDES[currentSlide]} />
+        <GlobalPhotoShowcase
+          enabled={"month" in SLIDES[currentSlide]}
+          month={
+            "month" in SLIDES[currentSlide]
+              ? SLIDES[currentSlide].month
+              : undefined
+          }
+        />
         {/* Slides */}
         {SLIDES.map((s, idx) => (
           <div
