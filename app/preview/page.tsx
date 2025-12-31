@@ -38,7 +38,7 @@ const MONTH_IMAGES: Record<string, string> = {
   December: "/MonthPhotos/December/6.jpg",
 };
 
-const FLASH_DURATION_MS = 8000;
+const FLASH_DURATION_MS = 1000; // 1s flash before routing
 
 declare global {
   interface Window {
@@ -50,7 +50,6 @@ export default function PreviewPage() {
   const router = useRouter();
   const bottomRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const keepPlayingRef = useRef(false);
   const [isFlashing, setIsFlashing] = useState(false);
 
   useEffect(() => {
@@ -65,25 +64,8 @@ export default function PreviewPage() {
 
     return () => {
       audioRef.current = null;
-
-      if (!keepPlayingRef.current) {
-        window.__wrappedAudio?.pause();
-      }
     };
   }, []);
-
-  useEffect(() => {
-    if (!isFlashing || !audioRef.current) return;
-
-    audioRef.current.currentTime = 0;
-    audioRef.current.play().catch(() => {
-      /* Ignore autoplay rejection; user already clicked the trigger. */
-    });
-
-    return () => {
-      audioRef.current?.pause();
-    };
-  }, [isFlashing]);
 
   const handleStartWrap = async () => {
     if (bottomRef.current) {
@@ -95,7 +77,6 @@ export default function PreviewPage() {
         onComplete: () => {
           setIsFlashing(true);
           setTimeout(() => {
-            keepPlayingRef.current = true;
             router.push("/2025");
           }, FLASH_DURATION_MS);
         },
@@ -123,6 +104,12 @@ export default function PreviewPage() {
       <section
         id="get-started"
         className="relative flex h-screen w-full items-center justify-center overflow-hidden bg-linear-to-br from-violet-600 via-purple-600 to-indigo-600 px-6"
+        onClick={handleStartWrap}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") handleStartWrap();
+        }}
       >
         <motion.div
           className="flex flex-col items-center gap-8 text-center"
@@ -142,12 +129,9 @@ export default function PreviewPage() {
             Happy New Year! Dive into our personalized 2025 Wrapped and relive
             our favorite moments from the past year.
           </p>
-          <motion.button
-            onClick={handleStartWrap}
-            className="mt-8 rounded-full bg-white px-8 py-4 text-lg font-bold text-violet-600 shadow-xl transition hover:shadow-2xl"
-          >
-            Press start to unwrap
-          </motion.button>
+          <div className="mt-8 rounded-full bg-white/90 px-8 py-4 text-lg font-bold text-violet-700 shadow-xl transition hover:shadow-2xl">
+            Press to Start
+          </div>
         </motion.div>
       </section>
 

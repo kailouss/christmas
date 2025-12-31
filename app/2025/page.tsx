@@ -38,6 +38,11 @@ export default function WrappedGate() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const { isUnlocked } = useCountdown(TARGET_DATE);
   const slideContainerRef = useRef<HTMLDivElement>(null!);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [audioStarted, setAudioStarted] = useState(false);
+  const [hasUnwrapped, setHasUnwrapped] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   // Intro timed text states
   const [showIntroTitle, setShowIntroTitle] = useState(false);
   const [showIntroSubtitle, setShowIntroSubtitle] = useState(false);
@@ -66,7 +71,7 @@ export default function WrappedGate() {
 
   // 1st: BigFlash at 2sec
   useFlash(slideContainerRef, {
-    enabled: true,
+    enabled: audioStarted,
     startDelay: getFlashDelay(2000),
     duration: 150,
     intensity: 0.5,
@@ -74,7 +79,7 @@ export default function WrappedGate() {
 
   // 2nd: SmallFlash (4 times) starting at 2.5sec, repeating every 2sec
   useFlash(slideContainerRef, {
-    enabled: true,
+    enabled: audioStarted,
     startDelay: getFlashDelay(2500),
     interval: 2000,
     count: 4,
@@ -84,7 +89,7 @@ export default function WrappedGate() {
 
   // 3rd: BigFlash at 10.5sec (2.5sec + 4*2sec for small flashes)
   useFlash(slideContainerRef, {
-    enabled: true,
+    enabled: audioStarted,
     startDelay: getFlashDelay(10400),
     duration: 150,
     intensity: 0.5,
@@ -92,7 +97,7 @@ export default function WrappedGate() {
 
   // 4th: SmallFlash (4 times) starting at 11sec, repeating every 2sec
   useFlash(slideContainerRef, {
-    enabled: true,
+    enabled: audioStarted,
     startDelay: getFlashDelay(11000),
     interval: 2000,
     count: 4,
@@ -107,17 +112,43 @@ export default function WrappedGate() {
     const audio = existingAudio ?? new Audio("/wrappedmusic.mp3");
     audio.preload = "auto";
     window.__wrappedAudio = audio;
+    audioRef.current = audio;
 
-    if (audio.paused) {
-      // Record the exact time when audio starts playing
-      window.__audioStartTime = Date.now();
-      audio.play().catch(() => {
-        /* If play is blocked, user can tap any control to resume. */
-      });
-    }
+    return () => {
+      audioRef.current?.pause();
+      audioRef.current = null;
+      if (window.__wrappedAudio) {
+        window.__wrappedAudio.pause();
+        window.__wrappedAudio = undefined;
+      }
+    };
   }, []);
 
   useEffect(() => {
+    if (!isLoading) return;
+
+    const duration = 8000;
+    const interval = 50;
+    const increment = (interval / duration) * 100;
+
+    const progressInterval = window.setInterval(() => {
+      setLoadingProgress((prev) => {
+        const next = prev + increment;
+        if (next >= 100) {
+          clearInterval(progressInterval);
+          setHasUnwrapped(true);
+          return 100;
+        }
+        return next;
+      });
+    }, interval);
+
+    return () => window.clearInterval(progressInterval);
+  }, [isLoading]);
+
+  useEffect(() => {
+    if (!hasUnwrapped) return;
+
     const slideDuration =
       currentSlide === 0 ? FIRST_SLIDE * 1000 : DEFAULT_SLIDE_DURATION * 1000;
 
@@ -126,10 +157,12 @@ export default function WrappedGate() {
     }, slideDuration);
 
     return () => clearTimeout(timer);
-  }, [currentSlide]);
+  }, [currentSlide, hasUnwrapped]);
 
   // Schedule intro text sequence
   useEffect(() => {
+    if (!hasUnwrapped) return;
+
     // Reset states on slide change
     setShowIntroTitle(false);
     setShowIntroSubtitle(false);
@@ -180,7 +213,7 @@ export default function WrappedGate() {
     return () => {
       timers.forEach((t) => window.clearTimeout(t));
     };
-  }, [currentSlide]);
+  }, [currentSlide, hasUnwrapped]);
 
   const slide = SLIDES[currentSlide];
   const progress = ((currentSlide + 1) / SLIDES.length) * 100;
@@ -197,8 +230,57 @@ export default function WrappedGate() {
     }
   };
 
+  const handleUnwrap = async () => {
+    if (!audioRef.current || isLoading) return;
+
+    // Start music immediately
+    audioRef.current.play().catch(() => {
+      /* Ignore autoplay errors; user interaction should allow play. */
+    });
+
+    setIsLoading(true);
+  };
+
+  useEffect(() => {
+    if (!hasUnwrapped) return;
+
+    // Set audio start time when intro slide appears (after loading completes)
+    window.__audioStartTime = Date.now();
+    setAudioStarted(true);
+    setCurrentSlide(0);
+  }, [hasUnwrapped]);
+
   return (
     <main className="h-screen w-screen overflow-hidden bg-[#0a0e27] relative">
+      {!hasUnwrapped && (
+        <div
+          className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-8 bg-white"
+          onClick={handleUnwrap}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") handleUnwrap();
+          }}
+        >
+          {isLoading ? (
+            <div className="flex flex-col items-center gap-4 px-6">
+              <div className="w-64 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-linear-to-r from-amber-400 via-yellow-500 to-orange-500 transition-all duration-100 ease-linear"
+                  style={{ width: `${loadingProgress}%` }}
+                />
+              </div>
+              <p className="text-sm text-gray-500 animate-pulse">
+                Loading your 2025 wrapped...
+              </p>
+            </div>
+          ) : (
+            <div className="text-xl font-semibold text-gray-900 animate-pulse">
+              Press anywhere to unwrap
+            </div>
+          )}
+        </div>
+      )}
       {/* Carousel Container */}
       <div ref={slideContainerRef} className="relative h-full w-full">
         {/* Global photo showcase overlay; enabled only on month slides */}
