@@ -241,23 +241,6 @@ export default function WrappedGate() {
     setIsLoading(true);
   };
 
-  // Preload all slide images when loading starts
-  useEffect(() => {
-    if (!isLoading) return;
-
-    // Preload images for all month slides
-    const monthSlides = SLIDES.filter((s) => "month" in s);
-    monthSlides.forEach((slide) => {
-      if ("month" in slide) {
-        // Preload main month images (adjust paths based on your actual image structure)
-        for (let i = 1; i <= 10; i++) {
-          const img = new Image();
-          img.src = `/MonthPhotos/${slide.month}/${i}.webp`;
-        }
-      }
-    });
-  }, [isLoading]);
-
   useEffect(() => {
     if (!hasUnwrapped) return;
 

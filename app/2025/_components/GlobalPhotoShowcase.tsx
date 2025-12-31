@@ -10,23 +10,37 @@ interface GlobalPhotoShowcaseProps {
 
 const GENERATE_INTERVAL_MS = 250; // 16 photos in ~4s
 const EXPOSURE_SECONDS = 1; // life of each photo
+const CHUNK_SIZE = 8; // load images in small batches
 
-// Preload images for given month to prevent lag
-function preloadMonthImages(month: string) {
-  if (typeof window === "undefined" || !month) return;
-
-  for (let i = 1; i <= 8; i++) {
-    const img = new Image();
-    img.src = `/MonthPhotos/${month}/${i}.webp`;
+// Apply WebP with responsive hints (single webp asset served at multiple targets)
+function setImageSource(img: HTMLImageElement, month?: string, index?: number) {
+  if (!month || index === undefined) {
+    img.src = "/test.webp";
+    return;
   }
+
+  const photoNumber = (index % 8) + 1;
+  const base = `/MonthPhotos/${month}/${photoNumber}.webp`;
+
+  img.src = base;
+  img.srcset = `${base} 480w, ${base} 960w, ${base} 1920w`;
+  img.sizes = "(max-width: 768px) 100vw, 50vw";
 }
 
-function getImageSource(month?: string, index?: number): string {
-  if (!month || index === undefined) return "/test.webp";
+// Preload images for given month to prevent lag
+function preloadChunk(month: string, startIndex: number) {
+  if (typeof window === "undefined" || !month) return;
 
-  // Cycle through photos 1-8 twice (16 total photos per month slide)
-  const photoNumber = (index % 8) + 1;
-  return `/MonthPhotos/${month}/${photoNumber}.webp`;
+  for (let i = startIndex; i < startIndex + CHUNK_SIZE; i++) {
+    const img = new Image();
+    setImageSource(img, month, i);
+    img.decoding = "async";
+    img.loading = "lazy";
+    // Hint decoder off main path
+    if (typeof img.decode === "function") {
+      img.decode().catch(() => {});
+    }
+  }
 }
 
 function randomPosition() {
@@ -47,6 +61,7 @@ export function GlobalPhotoShowcase({
   const containerRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<number | null>(null);
   const photoCountRef = useRef(0);
+  const nextPreloadStartRef = useRef(0);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -54,15 +69,19 @@ export function GlobalPhotoShowcase({
 
     // Reset photo counter and preload when month changes
     photoCountRef.current = 0;
+    nextPreloadStartRef.current = 0;
     if (month) {
-      preloadMonthImages(month);
+      preloadChunk(month, nextPreloadStartRef.current);
+      nextPreloadStartRef.current += CHUNK_SIZE;
     }
 
     const createAndAnimate = () => {
       const { top, left, initialScale, targetScale, rotation, moveX, moveY } =
         randomPosition();
       const img = document.createElement("img");
-      img.src = getImageSource(month, photoCountRef.current);
+      setImageSource(img, month, photoCountRef.current);
+      img.decoding = "async";
+      img.loading = "lazy";
       photoCountRef.current += 1;
       img.alt = "Wrapped memory";
       img.style.position = "absolute";
@@ -99,6 +118,16 @@ export function GlobalPhotoShowcase({
         delay: Math.max(aliveDuration - fadeOut, 0.3),
         onComplete: () => img.remove(),
       });
+
+      // Lazy-preload the next chunk while current chunk is showing
+      if (
+        month &&
+        photoCountRef.current % CHUNK_SIZE === 0 &&
+        nextPreloadStartRef.current <= photoCountRef.current + CHUNK_SIZE * 2
+      ) {
+        preloadChunk(month, nextPreloadStartRef.current);
+        nextPreloadStartRef.current += CHUNK_SIZE;
+      }
     };
 
     // manage interval based on enabled
