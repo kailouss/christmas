@@ -17,7 +17,7 @@ function preloadMonthImages(month: string) {
 
   for (let i = 1; i <= 8; i++) {
     const img = new Image();
-    img.src = `/MonthPhotos/${month}/${i}.jpg`;
+    img.src = `/MonthPhotos/${month}/${i}.webp`;
   }
 }
 
@@ -26,7 +26,7 @@ function getImageSource(month?: string, index?: number): string {
 
   // Cycle through photos 1-8 twice (16 total photos per month slide)
   const photoNumber = (index % 8) + 1;
-  return `/MonthPhotos/${month}/${photoNumber}.jpg`;
+  return `/MonthPhotos/${month}/${photoNumber}.webp`;
 }
 
 function randomPosition() {

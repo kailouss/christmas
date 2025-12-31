@@ -24,18 +24,18 @@ const MONTHS = [
 ];
 
 const MONTH_IMAGES: Record<string, string> = {
-  January: "/MonthPhotos/January/5.jpg",
-  February: "/MonthPhotos/February/4.jpg",
-  March: "/MonthPhotos/March/4.jpg",
-  April: "/MonthPhotos/April/1.jpg",
-  May: "/MonthPhotos/May/4.jpg",
-  June: "/MonthPhotos/June/3.jpg",
-  July: "/MonthPhotos/July/2.jpg",
-  August: "/MonthPhotos/August/3.jpg",
-  September: "/MonthPhotos/September/2.jpg",
-  October: "/MonthPhotos/October/3.jpg",
-  November: "/MonthPhotos/November/1.jpg",
-  December: "/MonthPhotos/December/6.jpg",
+  January: "/MonthPhotos/January/5.webp",
+  February: "/MonthPhotos/February/4.webp",
+  March: "/MonthPhotos/March/4.webp",
+  April: "/MonthPhotos/April/1.webp",
+  May: "/MonthPhotos/May/4.webp",
+  June: "/MonthPhotos/June/3.webp",
+  July: "/MonthPhotos/July/2.webp",
+  August: "/MonthPhotos/August/3.webp",
+  September: "/MonthPhotos/September/2.webp",
+  October: "/MonthPhotos/October/3.webp",
+  November: "/MonthPhotos/November/1.webp",
+  December: "/MonthPhotos/December/6.webp",
 };
 
 const FLASH_DURATION_MS = 1000; // 1s flash before routing

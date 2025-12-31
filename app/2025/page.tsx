@@ -252,7 +252,7 @@ export default function WrappedGate() {
         // Preload main month images (adjust paths based on your actual image structure)
         for (let i = 1; i <= 10; i++) {
           const img = new Image();
-          img.src = `/MonthPhotos/${slide.month}/${i}.jpg`;
+          img.src = `/MonthPhotos/${slide.month}/${i}.webp`;
         }
       }
     });
